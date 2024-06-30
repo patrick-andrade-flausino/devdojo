@@ -1,16 +1,18 @@
 package academy.devdojo.springboot2.controller;
 
 import academy.devdojo.springboot2.domain.Anime;
-import academy.devdojo.springboot2.util.DateUtil;
-import lombok.AllArgsConstructor;
+import academy.devdojo.springboot2.records.AnimePostRecords;
+import academy.devdojo.springboot2.records.AnimePutRecords;
+import academy.devdojo.springboot2.service.AnimeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -20,13 +22,41 @@ import java.util.List;
 @RequiredArgsConstructor //utilizado qdo somente necessita de injeção de dependência nos atributos finais, bem como criação de getters e setters para os mesmos
 public class AnimeController {
 
-    private final DateUtil dateUtil;
+    private final AnimeService animeService;
 
-
-    @GetMapping("/list")
-    public List<Anime> list(){
-        log.info(dateUtil.formatLocalDateTimeDataBaseStyle(LocalDateTime.now()));
-        return List.of(new Anime("DBZ"), new Anime("Berserk"));
+    @GetMapping("/listpageable")
+    public ResponseEntity<Page<Anime>> list(Pageable pageable){
+        return ResponseEntity.ok(animeService.listAll(pageable)) ;
     }
 
+    @GetMapping("/list/all")
+    public ResponseEntity<List<Anime>> listnopagleable(){
+        return ResponseEntity.ok(animeService.listAllNoPageAble()) ;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Anime> findById(@PathVariable long id){
+        return ResponseEntity.ok(animeService.findByIdOrThrowRequestException(id)) ;
+    }
+
+    @GetMapping("/find")
+    public ResponseEntity<List<Anime>> findByName(@RequestParam String name){
+        return ResponseEntity.ok(animeService.findByName(name)) ;
+    }
+
+    @PostMapping
+    public ResponseEntity<Anime> save (@RequestBody @Valid AnimePostRecords anime){
+        return new ResponseEntity<>(animeService.save(anime), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable long id){
+        animeService.delete(id);
+        return  new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    @PutMapping
+    public ResponseEntity<Anime> replace (@RequestBody @Valid AnimePutRecords anime){
+        animeService.replace(anime);
+        return  new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
