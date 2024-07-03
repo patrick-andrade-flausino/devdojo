@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/anime")
@@ -35,7 +36,7 @@ public class AnimeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Anime> findById(@PathVariable long id){
+    public ResponseEntity<Anime> findById(@PathVariable UUID id){
         return ResponseEntity.ok(animeService.findByIdOrThrowRequestException(id)) ;
     }
 
@@ -50,7 +51,7 @@ public class AnimeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable long id){
+    public ResponseEntity<Void> delete(@PathVariable UUID id){
         animeService.delete(id);
         return  new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

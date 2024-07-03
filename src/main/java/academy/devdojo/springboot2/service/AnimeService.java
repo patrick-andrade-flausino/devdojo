@@ -18,8 +18,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
-@Log4j2
+
 @Service
 @RequiredArgsConstructor
 public class AnimeService {
@@ -27,41 +28,37 @@ public class AnimeService {
 
     private final AnimeRepository animeList;
     public Page<Anime> listAll(Pageable pagleable){
-        log.info(dateUtil.formatLocalDateTimeDataBaseStyle(LocalDateTime.now()));
         return animeList.findAll(pagleable);
     }
 
     public List<Anime> listAllNoPageAble(){
-        log.info(dateUtil.formatLocalDateTimeDataBaseStyle(LocalDateTime.now()));
         return animeList.findAll();
     }
     public List<Anime> findByName(String name){
-        log.info(dateUtil.formatLocalDateTimeDataBaseStyle(LocalDateTime.now()));
         return animeList.findByName(name);
     }
 
-    public Anime findByIdOrThrowRequestException(long id){
-        log.info(dateUtil.formatLocalDateTimeDataBaseStyle(LocalDateTime.now()));
+    public Anime findByIdOrThrowRequestException(UUID id){
         return animeList.findById(id).orElseThrow(() -> new BadRequestException("ID do anime não encontrado!"));
     }
 
 //    @Transactional(rollbackOn = Exception.class )
     @Transactional
     public Anime save(AnimePostRecords anime){
-        var animesave = new Anime();
+        var animesave = Anime.builder().build();
         BeanUtils.copyProperties(anime, animesave);
         animeList.save(animesave);
         return animesave;
     }
 
     @Transactional
-    public void delete(long id){
+    public void delete(UUID id){
         animeList.deleteById(id);
     }
 
     @Transactional
     public void replace(AnimePutRecords anime) {
-        var animePut = new Anime();
+        var animePut = Anime.builder().build();
         animePut =  findByIdOrThrowRequestException(anime.getId());
         animePut.setName(anime.getName());
         animeList.save(animePut);
